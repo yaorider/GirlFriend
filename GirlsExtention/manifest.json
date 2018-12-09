@@ -1,0 +1,28 @@
+{
+  "manifest_version": 2,
+  "version": "0.0.1",
+  "name": "ガールフレンド（仮）サードパーティExtension",
+  "description": "ガールフレンド（仮）サードパーティExtension",
+  "browser_action": {
+        "default_title": "ガールフレンド（仮）サードパーティExtension",
+        "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://vcard.ameba.jp/mypage"],
+      "js": ["js/contents.js","js/jquery-3.3.1.min.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "scripts": ["js/background.js"],
+    "persistent": false
+  },
+  "permissions": [
+  		"activeTab",
+		"background",
+        "contextMenus",
+		"https://vcard.ameba.jp/mypage"
+  ],
+  "content_security_policy": "script-src 'self'; object-src 'self'"
+}

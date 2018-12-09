@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+  function getClickHandler() {
+    return function(info, tab) {
+      alert("ƒNƒŠƒbƒN‚³‚ê‚Ü‚µ‚½");
+    };
+  };
+ 
+  var parentId = chrome.contextMenus.create({
+    "title" : "samplemenu",
+    "type" : "normal",
+    "contexts" : ["all"],
+    "onclick" : getClickHandler()
+  });
+</script>
+</head>
+<body>
+</body>
+</html>
