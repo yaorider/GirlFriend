@@ -71,64 +71,86 @@ $(function(){
 		$("#myGirl").hide();
 		$("#adrress").hide();
 		alert("しばらく時間がかかりますのでそのままでお待ち下さい。\r\nOKボタンを押してください。");
-		var myGirls = [];
 
-		myGirlCount().done(function(searchCount){
-			var page = searchCount / 10;
-			page = Math.floor(page);
-			if (searchCount % 10 > 0) {
-				page = page + 1;
-			} 
-			for (var i=1; i <= page; i++) {
-				getMyGirl(1).done(function(searchList){
-					console.log("searchList",searchList);
-					$.each(searchList,function(i,data) {
-						var myGirl = {};
-						myGirl.cardName = data.cardName;
-						myGirl.rarityName = data.rarityName;
-						myGirl.sphereName = data.sphereName;
-						myGirls.push(data);
+		//We have permission to access the activeTab, so we can call chrome.tabs.executeScript:
+		chrome.tabs.executeScript({
+		    code: '(' + modifyDOM + ')();' //argument here is a string but function.toString() returns function's code
+		}, (results) => {
+
+			var myGirls = [];
+		    var token = results;
+
+			myGirlCount().done(function(searchCount){
+				var page = searchCount / 10;
+				page = Math.floor(page);
+				if (searchCount % 10 > 0) {
+					page = page + 1;
+				} 
+				for (var i=1; i <= page; i++) {
+					getMyGirl(i).done(function(searchList,token){
+						$.each(searchList,function(i,data) {
+							var myGirl = {};
+							myGirl.cardName = data.cardName;
+							myGirl.rarityName = data.rarityName;
+							myGirl.sphereName = data.sphereName;
+							if (data.limitbreakCount == 1) {
+								myGirl.limitbreakCount = "限界突破"
+							} else {
+								myGirl.limitbreakCount = "未突破"
+							}
+							myGirls.push(myGirl);
+						});
 					});
-				});
-			}
-			
-			var myGirl = {};
-			myGirl.cardName = "ガールの名前";
-			myGirl.rarityName = "レア度";
-			myGirl.sphereName = "属性";
-			myGirls.unshift(myGirl);
-			console.log("myGirls",myGirls);
-			
-		    // BOM の用意（文字化け対策）
-		    var bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+				}
+				myGirls.sort(
+					function(a, b){
+						a = a.rarityName.toString().toLowerCase();
+						b = b.rarityName.toString().toLowerCase();
+						if(a < b) {
+							return -1;
+						} else if(a > b){
+							return 1;
+						}
+						return 0;
+					}
+				);
+				
+				var myGirl = {};
+				myGirl.cardName = "ガールの名前";
+				myGirl.rarityName = "レア度";
+				myGirl.sphereName = "属性";
+				myGirl.limitbreakCount = "限界突破"
+				myGirls.unshift(myGirl);
+				
+			    // BOM の用意（文字化け対策）
+			    var bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
 
-		    // CSV データの用意
-		    var csv_data = myGirls.map(
-		    	function(l){
-		    		var tmp = l.cardName + "," + l.rarityName + "," + l.sphereName;
-		    		return tmp;
-		    	}
-	    	).join('\r\n');
-		    var blob = new Blob([bom, csv_data], { type: 'text/csv' });
-		    var url = (window.URL || window.webkitURL).createObjectURL(blob);
-		    var a = document.getElementById('downloader');
-		    a.download = '所持ガール.csv';
-		    a.href = url;
-			
-			$("#gifttGirl").show();
-			$("#myGirl").show();
-			$("#adrress").show();
-			alert("csvダウンロードが開始されます。\r\nOKボタンを押してください。");
+			    // CSV データの用意
+			    var csv_data = myGirls.map(
+			    	function(l){
+			    		var tmp = l.cardName + "," + l.rarityName + "," + l.sphereName + "," + l.limitbreakCount;
+			    		return tmp;
+			    	}
+		    	).join('\r\n');
+			    var blob = new Blob([bom, csv_data], { type: 'text/csv' });
+			    var url = (window.URL || window.webkitURL).createObjectURL(blob);
+			    var a = document.getElementById('downloader');
+			    a.download = '所持ガール.csv';
+			    a.href = url;
+				
+				$("#gifttGirl").show();
+				$("#myGirl").show();
+				$("#adrress").show();
+				alert("csvダウンロードが開始されます。\r\nOKボタンを押してください。");
 
-		    $('#downloader')[0].click();
+			    $('#downloader')[0].click();
 
+			});
 		});
-
 	});
-
 });
 
-function getMyGirl(page) {
+function getMyGirl(page,token) {
 	var defer = $.Deferred();
 	$.ajax({
 	  type: "GET",
@@ -179,7 +201,6 @@ function getGirls(token) {
 	}).done(function( data ) {
 		token = data.token;
 		var maxPage = data.data.maxPage;
-		console.log("maxPage",maxPage);
 		$.each(data.data.results,function(i,girls) {
 			var girlsData = {};
 			girlsData.name = girls.name;
