@@ -10,7 +10,7 @@ $(function(){
 		$("#gifttGirl").hide();
 		$("#myGirl").hide();
 		$("#adrress").hide();
-		alert("しばらく時間がかかりますのでそのままでお待ち下さい。\r\nOKボタンを押してください。");
+		$("#message").text("しばらく時間がかかりますのでそのままでお待ち下さい。");
 		console.log("Popup DOM fully loaded and parsed");
 		//We have permission to access the activeTab, so we can call chrome.tabs.executeScript:
 		chrome.tabs.executeScript({
@@ -58,10 +58,11 @@ $(function(){
 				$("#gifttGirl").show();
 				$("#myGirl").show();
 				$("#adrress").show();
-				alert("csvダウンロードが開始されます。\r\nOKボタンを押してください。");
 
 			    // ダウンロードリンクをクリックする
 			    $('#downloader')[0].click();
+
+				$("#message").text("");
 		    });
 		});
 	});
@@ -70,7 +71,7 @@ $(function(){
 		$("#gifttGirl").hide();
 		$("#myGirl").hide();
 		$("#adrress").hide();
-		alert("しばらく時間がかかりますのでそのままでお待ち下さい。\r\nOKボタンを押してください。");
+		$("#message").text("しばらく時間がかかりますのでそのままでお待ち下さい。");
 
 		//We have permission to access the activeTab, so we can call chrome.tabs.executeScript:
 		chrome.tabs.executeScript({
@@ -141,9 +142,9 @@ $(function(){
 				$("#gifttGirl").show();
 				$("#myGirl").show();
 				$("#adrress").show();
-				alert("csvダウンロードが開始されます。\r\nOKボタンを押してください。");
 
 			    $('#downloader')[0].click();
+				$("#message").text("");
 
 			});
 		});
